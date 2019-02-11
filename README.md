@@ -37,17 +37,21 @@ Examples of correct input
 - BUY 3 Painting "Girl on the ball" Picasso 100
 - BUY 4 Music Despacito "Luis Fonsi" 25
 
-Then imagine we are trying to print all the records in the database. We should see the following result:
+Then imagine we are trying to print all the records in the database assuming that initial budget was 150. We should see the following result:
 ```
 3 Painting "Girl on the ball" Picasso 100
 4 Music Despacito "Luis Fonsi" 25
+25
+125
 ```
 - BUY 3 Painting "Girl on the ball" Picasso 100
 - BUY 4 Music Despacito "Luis Fonsi" 25
 - UPDATE 3 Painting "Girl on the ball" Picasso 125
 
-Then imagine we are trying to print all the records in the database. We should see the following result:
+Then imagine we are trying to print all the records in the database assuming that initial budget was 150. We should see the following result:
 ```
 3 Painting "Girl on the ball" Picasso 125
 4 Music Despacito "Luis Fonsi" 25
+25
+150
 ```
