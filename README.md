@@ -39,8 +39,8 @@ Examples of correct input
 
 Then imagine we are trying to print all the records in the database assuming that initial budget was 150. We should see the following result:
 ```
-3 Painting "Girl on the ball" Picasso 100
-4 Music Despacito "Luis Fonsi" 25
+3 Painting Girl on the ball Picasso 100
+4 Music Despacito Luis Fonsi 25
 25
 125
 ```
@@ -50,8 +50,8 @@ Then imagine we are trying to print all the records in the database assuming tha
 
 Then imagine we are trying to print all the records in the database assuming that initial budget was 150. We should see the following result:
 ```
-3 Painting "Girl on the ball" Picasso 125
-4 Music Despacito "Luis Fonsi" 25
+3 Painting Girl on the ball Picasso 125
+4 Music Despacito Luis Fonsi 25
 25
 150
 ```
