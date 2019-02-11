@@ -28,7 +28,7 @@ You program is supposed to print `ID NOT UNIQUE`.
 
 - BUY 4 Painting "Girl on the ball" Picasso 100
 - BUY 6 Music Despacito "Luis Fonsi" 25
-- DELETE 4
+- DELETE 5
  
 Now you should print `RECORD  CANNOT  BE  DELETED  NOR  UPDATED`.
 
