@@ -15,7 +15,7 @@ In your new repository you will have hidden file for Travis CI. Please don't mod
 
 You also can see Makefile file. It helps to build you program by issuing a simple command
 ```
-make
+$ make
 ```
 And that's it. Please modify it according to your needs but we still should be able just to run `make` and then everything should work. Most likely you will not need to change it. There is also this README file in the repository.
 
