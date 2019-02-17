@@ -1,45 +1,47 @@
 #include <stdio.h>
+#include <stdlib.h>
+#define BOOLEAN char
+#define TRUE 1
+#define FALSE 0
 
-typedef struct ArtPiece {
-	ArtPiece *prev;
-	ArtPiece *next;
+struct art_piece{
+	struct art_piece *next;
 
 	int id;
 	char* art_type;
 	char* art_name;
 	char* artist_name;
 	int price;	
-} *head, *tail;
+};
 
-ArtPiece *createArtPiece(int id, char* art_type, char* art_name, char* artist_name, int price){
-	ArtPiece output;
-	output.id = id;
-	output.art_type = art_type;
-	output.art_name = art_name;
-	output.artist_name = artist_name;
-	output.price = price;
-	return *output;
+struct art_piece *head, *tail;
+
+struct art_piece* createArtPiece(int id, char* art_type, char* art_name, char* artist_name, int price){
+	struct art_piece *output = malloc(sizeof(struct art_piece));
+	output->id = id;
+	output->art_type = art_type;
+	output->art_name = art_name;
+	output->artist_name = artist_name;
+	output->price = price;
+	return output;
 }
 
-bool empty = true;
+BOOLEAN empty = TRUE;
 
-void insertNewArtPiece(ArtPiece *app){
+void insertNewArtPiece(struct art_piece *app){
 	if (empty){
 		head = app;
 		tail = app;
-		(&app).prev = head;
-		(&app).next = tail;
-		empty = false;
+		(*app).next = tail;
+		empty = FALSE;
 	}
 	else{
-		ArtPiece *cursor = head;
-		while(((&app).id > (&(&cursor).next).id) && (cursor != tail)){
-			cursor = (&cursor).next;
+		struct art_piece *cursor = head;
+		while(((*app).id > (*(*cursor).next).id) && (cursor != tail)){
+			cursor = (*cursor).next;
 		}
-		(&app).prev = cursor;
-		(&app).next = (&cursor).next;
-		(&cursor).next = app;
-		(&(&app).next).prev = app;
+		(*app).next = (*cursor).next;
+		(*cursor).next = app;
 	}
 }
 
