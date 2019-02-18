@@ -12,9 +12,7 @@ struct art_piece{
 	char* art_name;
 	char* artist_name;
 	int price;	
-};
-
-struct art_piece *head, *tail;
+} *head, *tail;
 
 struct art_piece* createArtPiece(int id, char* art_type, char* art_name, char* artist_name, int price){
 	struct art_piece *output = malloc(sizeof(struct art_piece));
@@ -37,18 +35,24 @@ void insertNewArtPiece(struct art_piece *app){
 	}
 	else{
 		struct art_piece *cursor = head;
-		while(((*app).id > (*(*cursor).next).id) && (cursor != tail)){
+		while((app->id > cursor->next->id) && (cursor != tail)){
 			cursor = (*cursor).next;
 		}
-		(*app).next = (*cursor).next;
-		(*cursor).next = app;
+		if (cursor->id == app->id){
+			printf("ID NOT UNIQUE\n");
+		}
+
+		app->next = cursor->next;
+		cursor->next = app;
 	}
 }
 
+int budget;
+
 int main(int argc, char** argv) {
-      /*
-       *   * Dummy values
-       *     */
+	/*
+	* 	* Dummy values
+	*/
 	int id = 1;
 	char* art_type = "Painting";
 	char* art_name = "Girl on the ball";
