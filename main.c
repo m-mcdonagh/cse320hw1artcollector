@@ -61,6 +61,33 @@ void insertNewArtPiece(struct art_piece *app){
 	}
 }
 
+void removeArtPiece(int id){
+	if (!empty){
+		for (struct art_piece *cursor = head; cursor->next != tail; cursor = cursor->next){
+			if (cursor->next->id == id){
+				cursor->next = cursor->next->next;
+				return;
+			}
+		}
+	}
+	printf("RECORD CANNOT BE DELETED NOR UPDATED");
+}
+
+void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, int price){
+	if (!empty){
+		for (struct art_piece *cursor = head->next; cursor != tail; cursor = cursor->next){
+			if (cursor->id == id){
+				cursor->art_type = art_type;
+				cursor->art_name = art_name;
+				cursor->artist_name = artist_name;
+				cursor->price = price;
+				return;
+			}
+		}
+	}
+	printf("RECORD CANNOT BE DELETED NOR UPDATED");
+}
+
 int budget; // Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
 
 int main(int argc, char** argv) {
