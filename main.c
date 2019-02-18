@@ -61,11 +61,18 @@ void insertNewArtPiece(struct art_piece *app){
 	}
 }
 
+/*
+ * Remove an Art Piece from the Linked List specified by its ID#
+ * Points the previous entry to the next entry, skipping over the removed art piece, and frees the memory allocated to it.
+ * Params: ID of the Art Piece to be removed
+ * Return: void
+ */
 void removeArtPiece(int id){
 	if (!empty){
 		for (struct art_piece *cursor = head; cursor->next != tail; cursor = cursor->next){
 			if (cursor->next->id == id){
 				cursor->next = cursor->next->next;
+				free(cursor);
 				return;
 			}
 		}
@@ -73,6 +80,11 @@ void removeArtPiece(int id){
 	printf("RECORD CANNOT BE DELETED NOR UPDATED");
 }
 
+/*
+ * Updates the members of an Art Piece specified by the ID# to the other fields (i.e. price)
+ * Params: id: to specify which art piece to update; art_type, art_name, artist_name, price: the new data to be held in the updated art piece
+ * Return: void 
+ */
 void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, int price){
 	if (!empty){
 		for (struct art_piece *cursor = head->next; cursor != tail; cursor = cursor->next){
