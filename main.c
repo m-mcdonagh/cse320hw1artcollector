@@ -106,13 +106,6 @@ void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, i
 	exit(5);
 }
 
-BOOLEAN allFlag		= FALSE; // Flag to keep track if -v was set
-BOOLEAN idFlag		= FALSE; // Flag to keep track if -i was set
-BOOLEAN typeFlag 	= FALSE; // Flag to keep track if -t was set
-BOOLEAN artistNameFlag  = FALSE; // Flag to keep track if -n was set
-
-int budget; // Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
-
 /*
  * String to Integer Converter
  * Params: string to be converted
@@ -128,6 +121,62 @@ int stringToInt(char* string){
 	}
 	return output;
 }
+
+/*
+ * String Splitter: splits command arguments string into 5 strings for each argument.
+ * If an argument is surrounded by quotes, all that is within the quotes is one argument.
+ * Otherwise, the arguments should be sepaerted by whitespace.
+ * Params: the string to be split
+ * Return: Pointer to 5 pointers to 5 strings
+ */
+char** stringSplitter(char* string){
+	if (*string == '\0'){
+		printf("FAILED TO PARSE FILE\n");
+		exit(3);
+	}
+	char** artPiece = malloc(5*sizeof(char*));
+	char** output = artPiece;
+	int inputCheck = 0;
+	*artPiece = string;
+	artPiece++; inputCheck++;
+	while (*++string != '\0'){
+		if (*string == ' '){
+			*string = '\0';
+			while (isspace(*++string));
+			if (*string == '\"'){
+				*artPiece = ++string;
+				artPiece++; inputCheck++;
+				while (*string != '\"'){
+					if (*string == '\0'){
+						printf("FAILED TO PARSE FILE\n");
+						exit(3);
+					}
+					string++;
+				}
+				*string = '\0';
+				while(isspace(*++string));
+			}
+			*artPiece = string;
+			artPiece++; inputCheck++;
+		}
+		if (inputCheck > 5){
+			printf("FAILED TO PARSE FILE\n");
+			exit(0);
+		}
+	}
+	if (inputCheck != 5){
+		printf("FAILED TO PARSE FILE\n");
+		exit(0);
+	}
+	return output;
+}
+
+BOOLEAN allFlag		= FALSE; // Flag to keep track if -v was set
+BOOLEAN idFlag		= FALSE; // Flag to keep track if -i was set
+BOOLEAN typeFlag 	= FALSE; // Flag to keep track if -t was set
+BOOLEAN artistNameFlag  = FALSE; // Flag to keep track if -n was set
+
+int budget; // Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
 
 int main(int argc, char** argv) {
 	if (argc < 2){
@@ -184,18 +233,22 @@ int main(int argc, char** argv) {
 					printf("%p\n", output);
 					break;
 				default:
-					printf("FAILED TO PARSE FILE\n");
-					exit(3);
+					printf("OTHER ERROR\n");
+					exit(8);
+					break;
 			}
 		}
+		else{
+			printf("OTHER ERROR\n");
+			exit(8);
+		}
 	}
-
 	if (allFlag && (idFlag || typeFlag || artistNameFlag)){
-		printf("FAILED TO PARSE FILE\n");
-		exit(3);
+		printf("OTHER ERROR\n");
+		exit(8);
 	}
 
-
+	
 
 	/*
 	* 	* Dummy values
