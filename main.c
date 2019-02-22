@@ -111,46 +111,44 @@ BOOLEAN idFlag		= FALSE; // Flag to keep track if -i was set
 BOOLEAN typeFlag 	= FALSE; // Flag to keep track if -t was set
 BOOLEAN artistNameFlag  = FALSE; // Flag to keep track if -n was set
 
-double budget; // Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
+int budget; // Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
 
 /*
  * String to Integer Converter
  * Params: string to be converted
- * Return: the double read in from the string
+ * Return: the int read in from the string
  */
-double stringToDouble(char* string){
-	double output = 0.0;
+int stringToInt(char* string){
+	int output = 0;
 	char* c = string;
 	while(*c >= '0' && *c <= '9'){
 		output *= 10;
 		output += *c - '0';
 		c++;
 	}
-	if (*c == '.'){
-		int placeholder = -1;
-		while (*++c != '\0')
-			if (isdigit(*c))
-				output += (*c - '0') * pow(10, placeholder--);
-	}
 	return output;
 }
 
 int main(int argc, char** argv) {
-
 	if (argc < 2){
 		printf("NO QUERY PROVIDED\n");
 		exit(1);
 	}
-	//FILE* input = fopen(*(argv+1), "r");
+	FILE* output = NULL;
+	FILE* input = fopen(*(++argv), "r");
+	argc--;
+	if (!input){
+		printf("FAILED TO PARSE FILE\n");
+		exit(3);
+	}
 
 	while (--argc > 0){
 		char* arg = *++argv;
 		if (*arg == '-'){
 			switch (*++arg){
 				case 'b':
-					budget = stringToDouble(*++argv);
+					budget = stringToInt(*++argv);
 					argc--;
-					printf("Budget: %f\n", budget);
 					break;
 				case 'v':
 					allFlag = TRUE;
@@ -164,12 +162,39 @@ int main(int argc, char** argv) {
 				case 'n':
 					artistNameFlag = TRUE;
 					break;
+				case 'o':
+					output = fopen(*++argv, "r");
+					argc--;
+					if (output){
+						char answer;
+						while(answer != 'y'){
+							printf("FILE EXISTS. Overwrite File? (y/n)\n");
+							scanf("%c", &answer);
+							switch(tolower(answer)){
+								case 'y':
+									break;
+								case 'n':
+									printf("FILE EXISTS\n");
+									exit(2);
+									break;
+							}
+						}
+					}
+					output = fopen(*argv, "w");
+					printf("%p\n", output);
+					break;
 				default:
-					printf("FAILED TO PARSE FILE");
+					printf("FAILED TO PARSE FILE\n");
 					exit(3);
 			}
 		}
 	}
+
+	if (allFlag && (idFlag || typeFlag || artistNameFlag)){
+		printf("FAILED TO PARSE FILE\n");
+		exit(3);
+	}
+
 
 
 	/*
@@ -187,7 +212,9 @@ int main(int argc, char** argv) {
     	* "%d %s %s %s %d\n", id, art_type, art_name, artist_name, price
 	*/
 	
-	//fclose(input);
+	fclose(input);
+	if (output)
+		fclose(output);
 	return 0;
 }
 
