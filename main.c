@@ -66,26 +66,6 @@ void insertNewArtPiece(struct art_piece *app){
 }
 
 /*
- * Remove an Art Piece from the Linked List specified by its ID#
- * Points the previous entry to the next entry, skipping over the removed art piece, and frees the memory allocated to it.
- * Params: ID of the Art Piece to be removed
- * Return: void
- */
-void removeArtPiece(int id){
-	if (!empty){
-		for (struct art_piece *cursor = head; cursor->next != tail; cursor = cursor->next){
-			if (cursor->next->id == id){
-				cursor->next = cursor->next->next;
-				free(cursor);
-				return;
-			}
-		}
-	}
-	printf("RECORD CANNOT BE DELETED NOR UPDATED\n");
-	exit(5);
-}
-
-/*
  * Updates the members of an Art Piece specified by the ID# to the other fields (i.e. price)
  * Params: id: to specify which art piece to update; art_type, art_name, artist_name, price: the new data to be held in the updated art piece
  * Return: void 
@@ -98,6 +78,26 @@ void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, i
 				cursor->art_name = art_name;
 				cursor->artist_name = artist_name;
 				cursor->price = price;
+				return;
+			}
+		}
+	}
+	printf("RECORD CANNOT BE DELETED NOR UPDATED\n");
+	exit(5);
+}
+
+/*
+ * Remove an Art Piece from the Linked List specified by its ID#
+ * Points the previous entry to the next entry, skipping over the removed art piece, and frees the memory allocated to it.
+ * Params: ID of the Art Piece to be removed
+ * Return: void
+ */
+void removeArtPiece(int id){
+	if (!empty){
+		for (struct art_piece *cursor = head; cursor->next != tail; cursor = cursor->next){
+			if (cursor->next->id == id){
+				cursor->next = cursor->next->next;
+				free(cursor);
 				return;
 			}
 		}
@@ -161,22 +161,77 @@ char** stringSplitter(char* string){
 		}
 		if (inputCheck > 5){
 			printf("FAILED TO PARSE FILE\n");
-			exit(0);
+			exit(3);
 		}
 	}
 	if (inputCheck != 5){
 		printf("FAILED TO PARSE FILE\n");
-		exit(0);
+		exit(3);
 	}
 	return output;
+}
+
+int budget; // Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
+
+/*
+ * Buy: creates a new art piece, inserts it into the database from the arguments of BUY, and updates the budget
+ * Params: argument string (art_id art_type art_name artist_name price)
+ * Return: void
+ */
+void buy(char* argumentString){
+	char** artPiece = stringSplitter(argumentString);
+	int id = 		stringToInt(*artPiece);
+	char* art_type =	*++artPiece;
+	char* art_name =	*++artPiece;
+	char* artist_name =	*++artPiece;
+	int price =		stringToInt(*artPiece);
+	struct art_piece* app = createArtPiece(id, art_type, art_name, artist_name, price);
+	insertNewArtPiece(app);
+	budget -= price;
+}
+
+/*
+ * Update: updates an existing art piece from the arguments of UPDATE
+ * Params: argument string (art_id art_type art_name artist_name price)
+ * Return: void
+ */
+void update(char* argumentString){
+	char** artPiece = stringSplitter(argumentString);
+	int id = 		stringToInt(*artPiece);
+	char* art_type =	*++artPiece;
+	char* art_name =	*++artPiece;
+	char* artist_name =	*++artPiece;
+	int price =		stringToInt(*artPiece);
+	updateArtPiece(id, art_type, art_name, artist_name, price);
+}
+
+/*
+ * Sell: removes the art piece specified by its id from the database via the arguments of SELL, and updates the budget
+ * Params: argument string (art_id price)
+ * Return: void
+ */
+void sell(char* argumentString){
+	char* idString = argumentString;
+	while (isspace(*argumentString))
+		argumentString++;
+	while (isspace(*++argumentString)){
+		if (*argumentString == '\0'){
+			printf("FAILED TO PARSE FILE\n");
+			exit(3);
+		}
+	}
+	*argumentString = '\0';
+	char* priceString = ++argumentString;
+	int id = 	stringToInt(idString);
+	removeArtPiece(id);
+	int price =	stringToInt(priceString);
+	budget += price;
 }
 
 BOOLEAN allFlag		= FALSE; // Flag to keep track if -v was set
 BOOLEAN idFlag		= FALSE; // Flag to keep track if -i was set
 BOOLEAN typeFlag 	= FALSE; // Flag to keep track if -t was set
 BOOLEAN artistNameFlag  = FALSE; // Flag to keep track if -n was set
-
-int budget; // Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
 
 int main(int argc, char** argv) {
 	if (argc < 2){
