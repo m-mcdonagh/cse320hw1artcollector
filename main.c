@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <math.h>
 #define BOOLEAN char
 #define TRUE 1
 #define FALSE 0
@@ -44,6 +46,7 @@ BOOLEAN empty = TRUE; //A value to track whether the linked list of art pieces i
  */
 void insertNewArtPiece(struct art_piece *app){
 	if (empty){
+		head = tail = calloc(1, sizeof(struct art_piece));
 		head->next = app;
 		app->next = tail;
 		empty = FALSE;
@@ -55,6 +58,7 @@ void insertNewArtPiece(struct art_piece *app){
 		}
 		if (cursor->id == app->id){
 			printf("ID NOT UNIQUE\n");
+			exit(4);
 		} 
 		app->next = cursor->next;
 		cursor->next = app;
@@ -77,7 +81,8 @@ void removeArtPiece(int id){
 			}
 		}
 	}
-	printf("RECORD CANNOT BE DELETED NOR UPDATED");
+	printf("RECORD CANNOT BE DELETED NOR UPDATED\n");
+	exit(5);
 }
 
 /*
@@ -97,28 +102,92 @@ void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, i
 			}
 		}
 	}
-	printf("RECORD CANNOT BE DELETED NOR UPDATED");
+	printf("RECORD CANNOT BE DELETED NOR UPDATED\n");
+	exit(5);
 }
 
-int budget; // Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
+BOOLEAN allFlag		= FALSE; // Flag to keep track if -v was set
+BOOLEAN idFlag		= FALSE; // Flag to keep track if -i was set
+BOOLEAN typeFlag 	= FALSE; // Flag to keep track if -t was set
+BOOLEAN artistNameFlag  = FALSE; // Flag to keep track if -n was set
+
+double budget; // Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
+
+/*
+ * String to Integer Converter
+ * Params: string to be converted
+ * Return: the double read in from the string
+ */
+double stringToDouble(char* string){
+	double output = 0.0;
+	char* c = string;
+	while(*c >= '0' && *c <= '9'){
+		output *= 10;
+		output += *c - '0';
+		c++;
+	}
+	if (*c == '.'){
+		int placeholder = -1;
+		while (*++c != '\0')
+			if (isdigit(*c))
+				output += (*c - '0') * pow(10, placeholder--);
+	}
+	return output;
+}
 
 int main(int argc, char** argv) {
+
+	if (argc < 2){
+		printf("NO QUERY PROVIDED\n");
+		exit(1);
+	}
+	//FILE* input = fopen(*(argv+1), "r");
+
+	while (--argc > 0){
+		char* arg = *++argv;
+		if (*arg == '-'){
+			switch (*++arg){
+				case 'b':
+					budget = stringToDouble(*++argv);
+					argc--;
+					printf("Budget: %f\n", budget);
+					break;
+				case 'v':
+					allFlag = TRUE;
+					break;
+				case 'i':
+					idFlag = TRUE;
+					break;
+				case 't':
+					typeFlag = TRUE;
+					break;
+				case 'n':
+					artistNameFlag = TRUE;
+					break;
+				default:
+					printf("FAILED TO PARSE FILE");
+					exit(3);
+			}
+		}
+	}
+
+
 	/*
 	* 	* Dummy values
-	*/
+	*
 	int id = 1;
 	char* art_type = "Painting";
 	char* art_name = "Girl on the ball";
 	char* artist_name = "Picasso";
-	int price = 100;
+	int price = 100;*/
 
 	/*
     	* This formatting for the string
     	* that you are expected to follow
-    	*/
+    	* "%d %s %s %s %d\n", id, art_type, art_name, artist_name, price
+	*/
 	
-	printf("%d %s %s %s %d\n", id, art_type, art_name, artist_name, price);
-
+	//fclose(input);
 	return 0;
 }
 
