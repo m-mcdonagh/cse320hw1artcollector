@@ -36,6 +36,84 @@ struct art_piece* createArtPiece(int id, char* art_type, char* art_name, char* a
 	return output;
 }
 
+int areEqual(char* s1, char* s2){
+	if (*s1 != *s2) return 0;
+	while(*s1 != '\0')
+		if (*++s1 != *++s2)
+			return 0;
+	return 1;
+}
+
+int numArtPieces = 0; //A value to track the number of Art Pieces in the data base
+
+BOOLEAN allFlag		= FALSE; // Flag to keep track if -v was set
+BOOLEAN idFlag		= FALSE; // Flag to keep track if -i was set
+BOOLEAN typeFlag 	= FALSE; // Flag to keep track if -t was set
+BOOLEAN artistNameFlag  = FALSE; // Flag to keep track if -n was set
+
+int idArg;
+char* typeArg;
+char* nameArg;
+FILE* out;
+
+void printArtPiece(struct art_piece* app){
+	if (out)
+		fprintf(out, "%d %s %s %s %d\n", app->id, app->art_type, app->art_name, app->artist_name, app->price);
+	else
+		printf("%d %s %s %s %d\n", app->id, app->art_type, app->art_name, app->artist_name, app->price);
+}
+
+void printAllArtPieces(){
+	if (allFlag){
+		for (struct art_piece *cursor = head->next; cursor != tail; cursor = cursor->next){
+			printArtPiece(cursor);
+		}
+	}
+	else{
+		struct art_piece** artPieces = malloc(numArtPieces*sizeof(struct art_piece*));
+		struct art_piece** temp = artPieces;
+		int counter;
+		struct art_piece* artPiece;
+		for (struct art_piece *cursor = head->next; cursor != tail; cursor = cursor->next){
+			
+			if (idFlag){
+				if (cursor->id == idArg)
+					artPiece = cursor;
+				else{
+					artPiece = NULL;
+					continue;
+				}
+			}
+
+			if (typeFlag){
+				if (areEqual(cursor->art_type, typeArg))
+					artPiece = cursor;
+				else{
+					artPiece = NULL;
+					continue;
+				}
+			}
+
+			if (artistNameFlag){
+				if (areEqual(cursor->artist_name, nameArg))
+					artPiece = cursor;
+				else{
+					artPiece = NULL;
+					continue;
+				}
+			}
+			if (artPiece){
+				*artPieces = artPiece;
+				artPieces++;
+				counter++;
+			}
+		}
+		artPieces = temp;
+		while (--counter > 0)
+			printArtPiece(*artPieces++);
+	}
+}
+
 BOOLEAN empty = TRUE; //A value to track whether the linked list of art pieces is empty so different intialization can occur for head and tail
 
 /*
@@ -46,7 +124,8 @@ BOOLEAN empty = TRUE; //A value to track whether the linked list of art pieces i
  */
 void insertNewArtPiece(struct art_piece *app){
 	if (empty){
-		head = tail = calloc(1, sizeof(struct art_piece));
+		head = calloc(1, sizeof(struct art_piece));
+		tail = calloc(1, sizeof(struct art_piece));
 		head->next = app;
 		app->next = tail;
 		empty = FALSE;
@@ -59,10 +138,13 @@ void insertNewArtPiece(struct art_piece *app){
 		if (cursor->id == app->id){
 			printf("ID NOT UNIQUE\n");
 			exit(4);
-		} 
+		}
 		app->next = cursor->next;
 		cursor->next = app;
 	}
+	numArtPieces++;
+	//printf("INSERTED: ");
+	//printArtPiece(app);
 }
 
 /*
@@ -71,7 +153,7 @@ void insertNewArtPiece(struct art_piece *app){
  * Return: void 
  */
 void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, int price){
-	if (!empty){
+	if (numArtPieces){
 		for (struct art_piece *cursor = head->next; cursor != tail; cursor = cursor->next){
 			if (cursor->id == id){
 				cursor->art_type = art_type;
@@ -93,11 +175,12 @@ void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, i
  * Return: void
  */
 void removeArtPiece(int id){
-	if (!empty){
+	if (numArtPieces){
 		for (struct art_piece *cursor = head; cursor->next != tail; cursor = cursor->next){
 			if (cursor->next->id == id){
 				cursor->next = cursor->next->next;
 				free(cursor);
+				numArtPieces--;
 				return;
 			}
 		}
@@ -114,6 +197,8 @@ void removeArtPiece(int id){
 int stringToInt(char* string){
 	int output = 0;
 	char* c = string;
+	while (isspace(*c))
+		c++;
 	while(*c >= '0' && *c <= '9'){
 		output *= 10;
 		output += *c - '0';
@@ -171,7 +256,8 @@ char** stringSplitter(char* string){
 	return output;
 }
 
-int budget; // Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
+int originalBudget; 	// Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
+int budget;		// Value to keep track of money left from original budget and all purchases/sales
 
 /*
  * Buy: creates a new art piece, inserts it into the database from the arguments of BUY, and updates the budget
@@ -184,7 +270,7 @@ void buy(char* argumentString){
 	char* art_type =	*++artPiece;
 	char* art_name =	*++artPiece;
 	char* artist_name =	*++artPiece;
-	int price =		stringToInt(*artPiece);
+	int price =		stringToInt(*++artPiece);
 	struct art_piece* app = createArtPiece(id, art_type, art_name, artist_name, price);
 	insertNewArtPiece(app);
 	budget -= price;
@@ -228,17 +314,12 @@ void sell(char* argumentString){
 	budget += price;
 }
 
-BOOLEAN allFlag		= FALSE; // Flag to keep track if -v was set
-BOOLEAN idFlag		= FALSE; // Flag to keep track if -i was set
-BOOLEAN typeFlag 	= FALSE; // Flag to keep track if -t was set
-BOOLEAN artistNameFlag  = FALSE; // Flag to keep track if -n was set
 
 int main(int argc, char** argv) {
 	if (argc < 2){
 		printf("NO QUERY PROVIDED\n");
 		exit(1);
 	}
-	FILE* output = NULL;
 	FILE* input = fopen(*(++argv), "r");
 	argc--;
 	if (!input){
@@ -251,7 +332,8 @@ int main(int argc, char** argv) {
 		if (*arg == '-'){
 			switch (*++arg){
 				case 'b':
-					budget = stringToInt(*++argv);
+					originalBudget = stringToInt(*++argv);
+					budget = originalBudget;
 					argc--;
 					break;
 				case 'v':
@@ -259,17 +341,23 @@ int main(int argc, char** argv) {
 					break;
 				case 'i':
 					idFlag = TRUE;
+					idArg = stringToInt(*++argv);
+					argc--;
 					break;
 				case 't':
 					typeFlag = TRUE;
+					typeArg = *++argv;
+					argc--;
 					break;
 				case 'n':
 					artistNameFlag = TRUE;
+					nameArg = *++argv;
+					argc--;
 					break;
 				case 'o':
-					output = fopen(*++argv, "r");
+					out = fopen(*++argv, "r");
 					argc--;
-					if (output){
+					if (out){
 						char answer;
 						while(answer != 'y'){
 							printf("FILE EXISTS. Overwrite File? (y/n)\n");
@@ -284,8 +372,7 @@ int main(int argc, char** argv) {
 							}
 						}
 					}
-					output = fopen(*argv, "w");
-					printf("%p\n", output);
+					out = fopen(*argv, "w");
 					break;
 				default:
 					printf("OTHER ERROR\n");
@@ -302,9 +389,44 @@ int main(int argc, char** argv) {
 		printf("OTHER ERROR\n");
 		exit(8);
 	}
-
 	
-
+	char* commandLine = malloc(256*sizeof(char));
+	while(fgets(commandLine, 256, input) != NULL){
+		printf("%s\n", commandLine);
+		switch(*commandLine){
+			case 'B':
+				if (*++commandLine != 'U' || *++commandLine != 'Y'){
+					printf("FAILED TO PARSE FILE\n");
+					exit(3);
+				}
+				commandLine++;
+				printf("%s\n\n", commandLine);
+				buy(++commandLine);
+				break;
+			case 'U':
+				if (*++commandLine != 'P' || *++commandLine != 'D' || *++commandLine != 'A' || *++commandLine != 'T' || *++commandLine != 'E'){
+					printf("FAILED TO PARSE FILE\n");
+					exit(3);
+				}
+				commandLine++;
+				printf("%s\n\n", commandLine);
+				update(++commandLine);
+				break;
+			case 'S':
+				if (*++commandLine != 'E' || *++commandLine != 'L' || *++commandLine != 'L'){
+					printf("FAILED TO PARSE FILE\n");
+					exit(3);
+				}
+				commandLine++;
+				printf("%s\n\n", commandLine);
+				sell(++commandLine);
+				break;
+			default:
+				printf("FAILED TO PARSE FILE\n");
+				exit(3);
+		}
+	}
+	printAllArtPieces();
 	/*
 	* 	* Dummy values
 	*
@@ -321,8 +443,9 @@ int main(int argc, char** argv) {
 	*/
 	
 	fclose(input);
-	if (output)
-		fclose(output);
+	if (out){
+		fclose(out);
+	}
 	return 0;
 }
 
