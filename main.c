@@ -21,6 +21,25 @@ struct art_piece{
 	int price;	
 } *head, *tail;
 
+/* Copy String: similar to strcpy, but we can't use that :(
+ * Params: String to be copied, and max size of the copied string;
+ * Return: Pointer to string allocated in the heap
+ */
+char* copyString(char* string, int size){
+	char* output = malloc(size*sizeof(char));
+	char* temp = output;
+	for (int i=0; i<=size; i++){
+		*temp = *string;
+		temp++;
+		string++;
+		if (*string == '\0'){
+			return output;
+		}
+	}
+	printf("FAILED TO PARSE FILE\n");
+	exit(3);
+}
+
 /*
  * Method to Create an Art Piece in the context of a linked list
  * Params: an ID, Type, Name, Artist Name, and Price that describe a real-world art piece
@@ -29,13 +48,17 @@ struct art_piece{
 struct art_piece* createArtPiece(int id, char* art_type, char* art_name, char* artist_name, int price){
 	struct art_piece *output = malloc(sizeof(struct art_piece));
 	output->id = id;
-	output->art_type = art_type;
-	output->art_name = art_name;
-	output->artist_name = artist_name;
+	output->art_type = copyString(art_type, 11);
+	output->art_name = copyString(art_name, 51);
+	output->artist_name = copyString(artist_name, 20);
 	output->price = price;
 	return output;
 }
 
+/* Are [These Strings] Equal:  similar to strcmp, but we can't use that :(
+ * Params: Strings to be compared
+ * Return: 1 if contain the same chars and of the same size, 0 otherwise
+ */
 int areEqual(char* s1, char* s2){
 	if (*s1 != *s2) return 0;
 	while(*s1 != '\0')
@@ -56,6 +79,10 @@ char* typeArg;
 char* nameArg;
 FILE* out;
 
+/* Print Art Piece: prints the data of an art piece to either stdin or a file if it was specified (by global variable out)
+ * Params: Pointer to the art piece to be printed
+ * Return: void
+ */
 void printArtPiece(struct art_piece* app){
 	if (out)
 		fprintf(out, "%d %s %s %s %d\n", app->id, app->art_type, app->art_name, app->artist_name, app->price);
@@ -63,6 +90,10 @@ void printArtPiece(struct art_piece* app){
 		printf("%d %s %s %s %d\n", app->id, app->art_type, app->art_name, app->artist_name, app->price);
 }
 
+/* Print All Art Pieces: prints all the art pieces specified by the argument flags (-v for all, etc.)
+ * Params: void (gets the data structure through the global head);
+ * Return: void
+ */
 void printAllArtPieces(){
 	if (allFlag){
 		for (struct art_piece *cursor = head->next; cursor != tail; cursor = cursor->next){
@@ -143,8 +174,6 @@ void insertNewArtPiece(struct art_piece *app){
 		cursor->next = app;
 	}
 	numArtPieces++;
-	//printf("INSERTED: ");
-	//printArtPiece(app);
 }
 
 /*
@@ -392,34 +421,30 @@ int main(int argc, char** argv) {
 	
 	char* commandLine = malloc(256*sizeof(char));
 	while(fgets(commandLine, 256, input) != NULL){
-		printf("%s\n", commandLine);
 		switch(*commandLine){
 			case 'B':
 				if (*++commandLine != 'U' || *++commandLine != 'Y'){
 					printf("FAILED TO PARSE FILE\n");
 					exit(3);
 				}
-				commandLine++;
-				printf("%s\n\n", commandLine);
-				buy(++commandLine);
+				while (isspace(*++commandLine));
+				buy(commandLine);
 				break;
 			case 'U':
 				if (*++commandLine != 'P' || *++commandLine != 'D' || *++commandLine != 'A' || *++commandLine != 'T' || *++commandLine != 'E'){
 					printf("FAILED TO PARSE FILE\n");
 					exit(3);
 				}
-				commandLine++;
-				printf("%s\n\n", commandLine);
-				update(++commandLine);
+				while (isspace(*++commandLine));
+				update(commandLine);
 				break;
 			case 'S':
 				if (*++commandLine != 'E' || *++commandLine != 'L' || *++commandLine != 'L'){
 					printf("FAILED TO PARSE FILE\n");
 					exit(3);
 				}
-				commandLine++;
-				printf("%s\n\n", commandLine);
-				sell(++commandLine);
+				while (isspace(*++commandLine));
+				sell(commandLine);
 				break;
 			default:
 				printf("FAILED TO PARSE FILE\n");
@@ -427,21 +452,6 @@ int main(int argc, char** argv) {
 		}
 	}
 	printAllArtPieces();
-	/*
-	* 	* Dummy values
-	*
-	int id = 1;
-	char* art_type = "Painting";
-	char* art_name = "Girl on the ball";
-	char* artist_name = "Picasso";
-	int price = 100;*/
-
-	/*
-    	* This formatting for the string
-    	* that you are expected to follow
-    	* "%d %s %s %s %d\n", id, art_type, art_name, artist_name, price
-	*/
-	
 	fclose(input);
 	if (out){
 		fclose(out);
