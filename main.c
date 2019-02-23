@@ -21,7 +21,8 @@ struct art_piece{
 	int price;	
 } *head, *tail;
 
-/* Copy String: similar to strcpy, but we can't use that :(
+/* 
+ * Copy String: similar to strcpy, but we can't use that :(
  * Params: String to be copied, and max size of the copied string;
  * Return: Pointer to string allocated in the heap
  */
@@ -41,6 +42,44 @@ char* copyString(char* string, int size){
 }
 
 /*
+ * Concatenate [Two Strings]: similar to strcat, but we can't use that :(
+ * Params: Strings to be concateted
+ * Return: Pointer to new string of the concatination, with a space between
+ */
+char* concat(char* s1, char* s2){
+	char* temp1 = s1;
+	char* temp2 = s2;
+	int counter;
+	while(*temp1++ != '\0')
+		counter++;
+	while(*temp2++ != '\0')
+		counter++;
+	counter+= 2;
+	char* output = malloc(counter * sizeof(char));
+	char* temp = output;
+	while(*s1 != '\0')
+		*temp++ = *s1++;
+	*temp++ = ' ';
+	while(*s2 != '\0')
+		*temp++ = *s2++;
+	*temp = '\0';
+	return output;
+}
+
+/*
+ * Are [These Strings] Equal:  similar to strcmp, but we can't use that :(
+ * Params: Strings to be compared
+ * Return: 1 if contain the same chars and of the same size, 0 otherwise
+ */
+int areEqual(char* s1, char* s2){
+	if (*s1 != *s2) return 0;
+	while(*s1 != '\0')
+		if (*++s1 != *++s2)
+			return 0;
+	return 1;
+}
+
+/*
  * Method to Create an Art Piece in the context of a linked list
  * Params: an ID, Type, Name, Artist Name, and Price that describe a real-world art piece
  * Return: a pointer to an Art Piece Structure with all values initialized except next, since there's a separate function for that: insertNewArtPiece()
@@ -55,18 +94,6 @@ struct art_piece* createArtPiece(int id, char* art_type, char* art_name, char* a
 	return output;
 }
 
-/* Are [These Strings] Equal:  similar to strcmp, but we can't use that :(
- * Params: Strings to be compared
- * Return: 1 if contain the same chars and of the same size, 0 otherwise
- */
-int areEqual(char* s1, char* s2){
-	if (*s1 != *s2) return 0;
-	while(*s1 != '\0')
-		if (*++s1 != *++s2)
-			return 0;
-	return 1;
-}
-
 int numArtPieces = 0; //A value to track the number of Art Pieces in the data base
 
 BOOLEAN allFlag		= FALSE; // Flag to keep track if -v was set
@@ -79,7 +106,8 @@ char* typeArg;
 char* nameArg;
 FILE* out;
 
-/* Print Art Piece: prints the data of an art piece to either stdin or a file if it was specified (by global variable out)
+/* 
+ * Print Art Piece: prints the data of an art piece to either stdin or a file if it was specified (by global variable out)
  * Params: Pointer to the art piece to be printed
  * Return: void
  */
@@ -90,7 +118,8 @@ void printArtPiece(struct art_piece* app){
 		printf("%d %s %s %s %d\n", app->id, app->art_type, app->art_name, app->artist_name, app->price);
 }
 
-/* Print All Art Pieces: prints all the art pieces specified by the argument flags (-v for all, etc.)
+/* 
+ * Print All Art Pieces: prints all the art pieces specified by the argument flags (-v for all, etc.)
  * Params: void (gets the data structure through the global head);
  * Return: void
  */
@@ -103,7 +132,7 @@ void printAllArtPieces(){
 	else{
 		struct art_piece** artPieces = malloc(numArtPieces*sizeof(struct art_piece*));
 		struct art_piece** temp = artPieces;
-		int counter;
+		int counter = 0;
 		struct art_piece* artPiece;
 		for (struct art_piece *cursor = head->next; cursor != tail; cursor = cursor->next){
 			
@@ -137,11 +166,21 @@ void printAllArtPieces(){
 				*artPieces = artPiece;
 				artPieces++;
 				counter++;
+				artPiece = NULL;
 			}
 		}
+		if (artPiece){
+			*artPieces = artPiece;
+			counter++;
+		}
 		artPieces = temp;
-		while (--counter > 0)
+		if (!counter){
+			printf("RECORD NOT FOUND\n");
+			exit(6);
+		}
+		while (--counter >= 0)
 			printArtPiece(*artPieces++);
+		free(temp);
 	}
 }
 
@@ -418,7 +457,6 @@ int main(int argc, char** argv) {
 		printf("OTHER ERROR\n");
 		exit(8);
 	}
-	
 	char* commandLine = malloc(256*sizeof(char));
 	while(fgets(commandLine, 256, input) != NULL){
 		switch(*commandLine){
