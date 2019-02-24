@@ -9,7 +9,7 @@
 /*
  * The Structure for the Basic Art Piece
  * Members: its ID, Type, Name, Artist Name, Price, and a pointer to the Art Piece with the next highest ID#
- * 	head and tail are used to manipulate the linked list data struture of all Art Pieces
+ * 	art_pieces and tail are used to manipulate the linked list data struture of all Art Pieces
  */
 struct art_piece{
 	struct art_piece *next;
@@ -19,23 +19,49 @@ struct art_piece{
 	char* art_name;
 	char* artist_name;
 	int price;	
-} *head, *tail;
+} *art_pieces, *tail;
+
+FILE* out; //File that will be printed to if specified
 
 /* 
- * Copy String: similar to strcpy, but we can't use that :(
+ * Copy String: similar to strcpy, but capitalizes every letter
  * Params: String to be copied, and max size of the copied string;
  * Return: Pointer to string allocated in the heap
  */
-char* copyString(char* string, int size){
+char* copyArtType(char* string, int size){
 	char* output = malloc(size*sizeof(char));
 	char* temp = output;
 	for (int i=0; i<=size; i++){
-		*temp = *string;
+		*temp = toupper(*string);
 		temp++;
-		string++;
 		if (*string == '\0'){
 			return output;
 		}
+		string++;
+	}
+	printf("FAILED TO PARSE FILE\n");
+	exit(3);
+}
+
+/* 
+ * Copy String: similar to strcpy, but capitalizes every letter
+ * Params: String to be copied, and max size of the copied string;
+ * Return: Pointer to string allocated in the heap
+ */
+char* copyName(char* string, int size){
+	char* output = malloc(size*sizeof(char));
+	char* temp = output;
+	*temp = toupper(*string);
+	temp++;
+	if (*string == '\0')
+		return output;
+	string++;
+	for (int i=0; i<size; i++){
+		*temp = tolower(*string);
+		temp++;
+		if (*string == '\0')
+			return output;
+		string++;
 	}
 	printf("FAILED TO PARSE FILE\n");
 	exit(3);
@@ -79,21 +105,6 @@ int areEqual(char* s1, char* s2){
 	return 1;
 }
 
-/*
- * Method to Create an Art Piece in the context of a linked list
- * Params: an ID, Type, Name, Artist Name, and Price that describe a real-world art piece
- * Return: a pointer to an Art Piece Structure with all values initialized except next, since there's a separate function for that: insertNewArtPiece()
- */
-struct art_piece* createArtPiece(int id, char* art_type, char* art_name, char* artist_name, int price){
-	struct art_piece *output = malloc(sizeof(struct art_piece));
-	output->id = id;
-	output->art_type = copyString(art_type, 11);
-	output->art_name = copyString(art_name, 51);
-	output->artist_name = copyString(artist_name, 20);
-	output->price = price;
-	return output;
-}
-
 int numArtPieces = 0; //A value to track the number of Art Pieces in the data base
 
 BOOLEAN allFlag		= FALSE; // Flag to keep track if -v was set
@@ -104,7 +115,6 @@ BOOLEAN artistNameFlag  = FALSE; // Flag to keep track if -n was set
 int idArg;
 char* typeArg;
 char* nameArg;
-FILE* out;
 
 /* 
  * Print Art Piece: prints the data of an art piece to either stdin or a file if it was specified (by global variable out)
@@ -120,12 +130,12 @@ void printArtPiece(struct art_piece* app){
 
 /* 
  * Print All Art Pieces: prints all the art pieces specified by the argument flags (-v for all, etc.)
- * Params: void (gets the data structure through the global head);
+ * Params: void (gets the data structure through the global art_pieces);
  * Return: void
  */
 void printAllArtPieces(){
 	if (allFlag){
-		for (struct art_piece *cursor = head->next; cursor != tail; cursor = cursor->next){
+		for (struct art_piece *cursor = art_pieces->next; cursor != tail; cursor = cursor->next){
 			printArtPiece(cursor);
 		}
 	}
@@ -134,7 +144,7 @@ void printAllArtPieces(){
 		struct art_piece** temp = artPieces;
 		int counter = 0;
 		struct art_piece* artPiece;
-		for (struct art_piece *cursor = head->next; cursor != tail; cursor = cursor->next){
+		for (struct art_piece *cursor = art_pieces->next; cursor != tail; cursor = cursor->next){
 			
 			if (idFlag){
 				if (cursor->id == idArg)
@@ -184,7 +194,22 @@ void printAllArtPieces(){
 	}
 }
 
-BOOLEAN empty = TRUE; //A value to track whether the linked list of art pieces is empty so different intialization can occur for head and tail
+/*
+ * Method to Create an Art Piece in the context of a linked list
+ * Params: an ID, Type, Name, Artist Name, and Price that describe a real-world art piece
+ * Return: a pointer to an Art Piece Structure with all values initialized except next, since there's a separate function for that: insertNewArtPiece()
+ */
+struct art_piece* createArtPiece(int id, char* art_type, char* art_name, char* artist_name, int price){
+	struct art_piece *output = malloc(sizeof(struct art_piece));
+	output->id = id;
+	output->art_type = copyArtType(art_type, 11);
+	output->art_name = copyName(art_name, 51);
+	output->artist_name = copyName(artist_name, 20);
+	output->price = price;
+	return output;
+}
+
+BOOLEAN empty = TRUE; //A value to track whether the linked list of art pieces is empty so different intialization can occur for art_pieces and tail
 
 /*
  * Insert a Newly Created Art Piece (created with createArtPiece())
@@ -194,14 +219,14 @@ BOOLEAN empty = TRUE; //A value to track whether the linked list of art pieces i
  */
 void insertNewArtPiece(struct art_piece *app){
 	if (empty){
-		head = calloc(1, sizeof(struct art_piece));
+		art_pieces = calloc(1, sizeof(struct art_piece));
 		tail = calloc(1, sizeof(struct art_piece));
-		head->next = app;
+		art_pieces->next = app;
 		app->next = tail;
 		empty = FALSE;
 	}
 	else{
-		struct art_piece *cursor = head->next;
+		struct art_piece *cursor = art_pieces->next;
 		while((app->id > cursor->next->id) && (cursor->next != tail)){
 			cursor = cursor->next;
 		}
@@ -222,7 +247,7 @@ void insertNewArtPiece(struct art_piece *app){
  */
 void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, int price){
 	if (numArtPieces){
-		for (struct art_piece *cursor = head->next; cursor != tail; cursor = cursor->next){
+		for (struct art_piece *cursor = art_pieces->next; cursor != tail; cursor = cursor->next){
 			if (cursor->id == id){
 				cursor->art_type = art_type;
 				cursor->art_name = art_name;
@@ -244,10 +269,14 @@ void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, i
  */
 void removeArtPiece(int id){
 	if (numArtPieces){
-		for (struct art_piece *cursor = head; cursor->next != tail; cursor = cursor->next){
+		for (struct art_piece *cursor = art_pieces; cursor->next != tail; cursor = cursor->next){
 			if (cursor->next->id == id){
+				struct art_piece* temp = cursor->next;
 				cursor->next = cursor->next->next;
-				free(cursor);
+				free(temp->art_type);
+				free(temp->art_name);
+				free(temp->artist_name);
+				free(temp);
 				numArtPieces--;
 				return;
 			}
@@ -324,7 +353,6 @@ char** stringSplitter(char* string){
 	return output;
 }
 
-int originalBudget; 	// Maximum value for the sum of the price for all Art Pieces in the Linked List Data Structure
 int budget;		// Value to keep track of money left from original budget and all purchases/sales
 
 /*
@@ -342,6 +370,10 @@ void buy(char* argumentString){
 	struct art_piece* app = createArtPiece(id, art_type, art_name, artist_name, price);
 	insertNewArtPiece(app);
 	budget -= price;
+	if (budget < 0){
+		printf("NOT ENOUGHT MONIES\n");
+		exit(7);
+	}
 }
 
 /*
@@ -394,14 +426,13 @@ int main(int argc, char** argv) {
 		printf("FAILED TO PARSE FILE\n");
 		exit(3);
 	}
-
+	budget = -1;
 	while (--argc > 0){
 		char* arg = *++argv;
 		if (*arg == '-'){
 			switch (*++arg){
 				case 'b':
-					originalBudget = stringToInt(*++argv);
-					budget = originalBudget;
+					budget = stringToInt(*++argv);
 					argc--;
 					break;
 				case 'v':
@@ -423,7 +454,8 @@ int main(int argc, char** argv) {
 					argc--;
 					break;
 				case 'o':
-					out = fopen(*++argv, "r");
+					argv++;
+					out = fopen(*argv, "r");
 					argc--;
 					if (out){
 						char answer;
@@ -440,6 +472,7 @@ int main(int argc, char** argv) {
 							}
 						}
 					}
+					fclose(out);
 					out = fopen(*argv, "w");
 					break;
 				default:
@@ -452,6 +485,10 @@ int main(int argc, char** argv) {
 			printf("OTHER ERROR\n");
 			exit(8);
 		}
+	}
+	if (budget < -1){
+		printf("OTHER ERROR\n");
+		exit(8);
 	}
 	if (allFlag && (idFlag || typeFlag || artistNameFlag)){
 		printf("OTHER ERROR\n");
