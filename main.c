@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <math.h>
 #define BOOLEAN char
 #define TRUE 1
 #define FALSE 0
