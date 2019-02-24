@@ -102,9 +102,9 @@ char* concat(char* s1, char* s2){
  * Return: 1 if contain the same chars and of the same size, 0 otherwise
  */
 int areEqual(char* s1, char* s2){
-	if (*s1 != *s2) return 0;
+	if (toupper(*s1) != toupper(*s2)) return 0;
 	while(*s1 != '\0')
-		if (*++s1 != *++s2)
+		if (toupper(*++s1) != toupper(*++s2))
 			return 0;
 	return 1;
 }
@@ -478,28 +478,70 @@ int main(int argc, char** argv) {
 		if (*arg == '-'){
 			switch (*++arg){
 				case 'b':
+					if (*++arg != '\0'){
+						if (out)
+						       fprintf(out, "OTHER ERROR\n");
+						else
+							printf("OTHER ERROR\n");
+						exit(8);
+					}
 					budget = stringToInt(*++argv);
 					argc--;
 					break;
 				case 'v':
+					if (*++arg != '\0'){
+						if (out)
+						       fprintf(out, "OTHER ERROR\n");
+						else
+							printf("OTHER ERROR\n");
+						exit(8);
+					}
 					allFlag = TRUE;
 					break;
 				case 'i':
+					if (*++arg != '\0'){
+						if (out)
+						       fprintf(out, "OTHER ERROR\n");
+						else
+							printf("OTHER ERROR\n");
+						exit(8);
+					}
 					idFlag = TRUE;
 					idArg = stringToInt(*++argv);
 					argc--;
 					break;
 				case 't':
+					if (*++arg != '\0'){
+						if (out)
+						       fprintf(out, "OTHER ERROR\n");
+						else
+							printf("OTHER ERROR\n");
+						exit(8);
+					}
 					typeFlag = TRUE;
 					typeArg = *++argv;
 					argc--;
 					break;
 				case 'n':
+					if (*++arg != '\0'){
+						if (out)
+						       fprintf(out, "OTHER ERROR\n");
+						else
+							printf("OTHER ERROR\n");
+						exit(8);
+					}
 					artistNameFlag = TRUE;
 					nameArg = *++argv;
 					argc--;
 					break;
 				case 'o':
+					if (*++arg != '\0'){
+						if (out)
+						       fprintf(out, "OTHER ERROR\n");
+						else
+							printf("OTHER ERROR\n");
+						exit(8);
+					}
 					argv++;
 					argc--;
 					out = fopen(*argv, "r");
