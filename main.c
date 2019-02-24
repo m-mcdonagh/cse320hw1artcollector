@@ -39,7 +39,10 @@ char* copyArtType(char* string, int size){
 		}
 		string++;
 	}
-	printf("FAILED TO PARSE FILE\n");
+	if(out)
+		fprintf(out, "FAILED TO PARSE FILE\n");
+	else
+		printf("FAILED TO PARSE FILE\n");
 	exit(3);
 }
 
@@ -63,7 +66,10 @@ char* copyName(char* string, int size){
 			return output;
 		string++;
 	}
-	printf("FAILED TO PARSE FILE\n");
+	if (out)
+		fprintf(out, "FAILED TO PARSE FILE\n");
+	else
+		printf("FAILED TO PARSE FILE\n");
 	exit(3);
 }
 
@@ -85,7 +91,6 @@ char* concat(char* s1, char* s2){
 	char* temp = output;
 	while(*s1 != '\0')
 		*temp++ = *s1++;
-	*temp++ = ' ';
 	while(*s2 != '\0')
 		*temp++ = *s2++;
 	*temp = '\0';
@@ -105,7 +110,9 @@ int areEqual(char* s1, char* s2){
 	return 1;
 }
 
-int numArtPieces = 0; //A value to track the number of Art Pieces in the data base
+int numArtPieces = 0;	// Value to track the number of Art Pieces in the data base
+int budget;		// Value to keep track of money left from original budget and all purchases/sales
+int collectionWorth;	// Value to keep track of sum of the prices from all art pieces
 
 BOOLEAN allFlag		= FALSE; // Flag to keep track if -v was set
 BOOLEAN idFlag		= FALSE; // Flag to keep track if -i was set
@@ -185,13 +192,21 @@ void printAllArtPieces(){
 		}
 		artPieces = temp;
 		if (!counter){
-			printf("RECORD NOT FOUND\n");
+			if(out)
+				fprintf(out, "RECORD NOT FOUND\n");
+			else
+				printf("RECORD NOT FOUND\n");
 			exit(6);
 		}
 		while (--counter >= 0)
 			printArtPiece(*artPieces++);
 		free(temp);
 	}
+	if (out)
+		fprintf(out, "%d\n%d\n", budget, collectionWorth);
+	else
+		
+		printf("%d\n%d\n", budget, collectionWorth);
 }
 
 /*
@@ -231,7 +246,10 @@ void insertNewArtPiece(struct art_piece *app){
 			cursor = cursor->next;
 		}
 		if (cursor->id == app->id){
-			printf("ID NOT UNIQUE\n");
+			if (out)
+				fprintf(out, "ID NOT UNIQUE\n");
+			else
+				printf("ID NOT UNIQUE\n");
 			exit(4);
 		}
 		app->next = cursor->next;
@@ -249,6 +267,8 @@ void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, i
 	if (numArtPieces){
 		for (struct art_piece *cursor = art_pieces->next; cursor != tail; cursor = cursor->next){
 			if (cursor->id == id){
+				collectionWorth -= cursor->price;
+				collectionWorth += price;
 				cursor->art_type = art_type;
 				cursor->art_name = art_name;
 				cursor->artist_name = artist_name;
@@ -257,7 +277,10 @@ void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, i
 			}
 		}
 	}
-	printf("RECORD CANNOT BE DELETED NOR UPDATED\n");
+	if (out)
+		fprintf(out, "RECORD CANNOT BE DELETED NOR UPDATED\n");
+	else
+		printf("RECORD CANNOT BE DELETED NOR UPDATED\n");
 	exit(5);
 }
 
@@ -282,7 +305,10 @@ void removeArtPiece(int id){
 			}
 		}
 	}
-	printf("RECORD CANNOT BE DELETED NOR UPDATED\n");
+	if (out)
+		fprintf(out, "RECORD CANNOT BE DELETED NOR UPDATED\n");
+	else
+		printf("RECORD CANNOT BE DELETED NOR UPDATED\n");
 	exit(5);
 }
 
@@ -313,7 +339,10 @@ int stringToInt(char* string){
  */
 char** stringSplitter(char* string){
 	if (*string == '\0'){
-		printf("FAILED TO PARSE FILE\n");
+		if (out)
+			fprintf(out, "FAILED TO PARSE FILE");
+		else
+			printf("FAILED TO PARSE FILE\n");
 		exit(3);
 	}
 	char** artPiece = malloc(5*sizeof(char*));
@@ -330,7 +359,10 @@ char** stringSplitter(char* string){
 				artPiece++; inputCheck++;
 				while (*string != '\"'){
 					if (*string == '\0'){
-						printf("FAILED TO PARSE FILE\n");
+						if (out)
+							fprintf(out, "FAILED TO PARSE FILE");
+						else
+							printf("FAILED TO PARSE FILE\n");
 						exit(3);
 					}
 					string++;
@@ -342,18 +374,23 @@ char** stringSplitter(char* string){
 			artPiece++; inputCheck++;
 		}
 		if (inputCheck > 5){
-			printf("FAILED TO PARSE FILE\n");
+			if (out)
+				fprintf(out, "FAILED TO PARSE FILE");
+			else
+				printf("FAILED TO PARSE FILE\n");
 			exit(3);
 		}
 	}
 	if (inputCheck != 5){
-		printf("FAILED TO PARSE FILE\n");
+		if (out)
+			fprintf(out, "FAILED TO PARSE FILE");
+		else
+			printf("FAILED TO PARSE FILE\n");
 		exit(3);
 	}
 	return output;
 }
 
-int budget;		// Value to keep track of money left from original budget and all purchases/sales
 
 /*
  * Buy: creates a new art piece, inserts it into the database from the arguments of BUY, and updates the budget
@@ -370,8 +407,12 @@ void buy(char* argumentString){
 	struct art_piece* app = createArtPiece(id, art_type, art_name, artist_name, price);
 	insertNewArtPiece(app);
 	budget -= price;
+	collectionWorth += price;
 	if (budget < 0){
-		printf("NOT ENOUGHT MONIES\n");
+		if (out)
+			fprintf(out, "NOT ENOUGH MONIES\n");
+		else
+			printf("NOT ENOUGH MONIES\n");
 		exit(7);
 	}
 }
@@ -402,7 +443,10 @@ void sell(char* argumentString){
 		argumentString++;
 	while (isspace(*++argumentString)){
 		if (*argumentString == '\0'){
-			printf("FAILED TO PARSE FILE\n");
+			if (out)
+				fprintf(out, "FAILED TO PARSE FILE");
+			else
+				printf("FAILED TO PARSE FILE\n");
 			exit(3);
 		}
 	}
@@ -412,10 +456,12 @@ void sell(char* argumentString){
 	removeArtPiece(id);
 	int price =	stringToInt(priceString);
 	budget += price;
+	collectionWorth -= price;
 }
 
 
 int main(int argc, char** argv) {
+	collectionWorth = 0;
 	if (argc < 2){
 		printf("NO QUERY PROVIDED\n");
 		exit(1);
@@ -455,8 +501,8 @@ int main(int argc, char** argv) {
 					break;
 				case 'o':
 					argv++;
-					out = fopen(*argv, "r");
 					argc--;
+					out = fopen(*argv, "r");
 					if (out){
 						char answer;
 						while(answer != 'y'){
@@ -471,12 +517,19 @@ int main(int argc, char** argv) {
 									break;
 							}
 						}
+						fclose(out);
 					}
-					fclose(out);
 					out = fopen(*argv, "w");
+					if (!out){
+						printf("FAILED TO PARSE FILE\n");
+						exit(3);
+					}
 					break;
 				default:
-					printf("OTHER ERROR\n");
+					if (out)
+						fprintf(out, "OTHER ERROR\n");
+					else
+						printf("OTHER ERROR\n");
 					exit(8);
 					break;
 			}
@@ -487,12 +540,25 @@ int main(int argc, char** argv) {
 		}
 	}
 	if (budget < -1){
-		printf("OTHER ERROR\n");
+		if (out)
+			fprintf(out, "OTHER ERROR\n");
+		else
+			printf("OTHER ERROR\n");
 		exit(8);
 	}
 	if (allFlag && (idFlag || typeFlag || artistNameFlag)){
-		printf("OTHER ERROR\n");
+		if (out)
+			fprintf(out, "OTHER ERROR\n");
+		else
+			printf("OTHER ERROR\n");
 		exit(8);
+	}
+	if (!allFlag && !idFlag && !typeFlag && !artistNameFlag){
+		if (out)
+			fprintf(out, "NO QUERY PROVIDED\n");
+		else
+			printf("NO QUERY PROVIDED\n");
+		exit(1);
 	}
 	char* commandLine = malloc(256*sizeof(char));
 	while(fgets(commandLine, 256, input) != NULL){
