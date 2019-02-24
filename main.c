@@ -219,7 +219,7 @@ struct art_piece* createArtPiece(int id, char* art_type, char* art_name, char* a
 	output->id = id;
 	output->art_type = copyArtType(art_type, 11);
 	output->art_name = copyName(art_name, 51);
-	output->artist_name = copyName(artist_name, 20);
+	output->artist_name = copyName(artist_name, 21);
 	output->price = price;
 	return output;
 }
@@ -269,9 +269,9 @@ void updateArtPiece(int id, char* art_type, char* art_name, char* artist_name, i
 			if (cursor->id == id){
 				collectionWorth -= cursor->price;
 				collectionWorth += price;
-				cursor->art_type = art_type;
-				cursor->art_name = art_name;
-				cursor->artist_name = artist_name;
+				cursor->art_type = copyArtType(art_type, 11);
+				cursor->art_name = copyName(art_name, 51);
+				cursor->artist_name = copyName(artist_name, 21);
 				cursor->price = price;
 				return;
 			}
@@ -299,6 +299,7 @@ void removeArtPiece(int id){
 				free(temp->art_type);
 				free(temp->art_name);
 				free(temp->artist_name);
+				collectionWorth -= temp->price;
 				free(temp);
 				numArtPieces--;
 				return;
@@ -428,7 +429,7 @@ void update(char* argumentString){
 	char* art_type =	*++artPiece;
 	char* art_name =	*++artPiece;
 	char* artist_name =	*++artPiece;
-	int price =		stringToInt(*artPiece);
+	int price =		stringToInt(*++artPiece);
 	updateArtPiece(id, art_type, art_name, artist_name, price);
 }
 
@@ -438,10 +439,10 @@ void update(char* argumentString){
  * Return: void
  */
 void sell(char* argumentString){
-	char* idString = argumentString;
 	while (isspace(*argumentString))
 		argumentString++;
-	while (isspace(*++argumentString)){
+	char* idString = argumentString;
+	while (!isspace(*++argumentString)){
 		if (*argumentString == '\0'){
 			if (out)
 				fprintf(out, "FAILED TO PARSE FILE");
@@ -451,12 +452,12 @@ void sell(char* argumentString){
 		}
 	}
 	*argumentString = '\0';
-	char* priceString = ++argumentString;
+	while (isspace(*++argumentString));
+	char* priceString = argumentString;
 	int id = 	stringToInt(idString);
 	removeArtPiece(id);
 	int price =	stringToInt(priceString);
 	budget += price;
-	collectionWorth -= price;
 }
 
 
